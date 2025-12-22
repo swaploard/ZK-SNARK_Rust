@@ -1,6 +1,21 @@
-[package]
-name = "zk_snark_rust"
-version = "0.1.0"
-edition = "2024"
+[workspace]
+resolver = "2"
+members = [
+    "prover",
+    "verifier",
+    "trusted_setup",
+    "protocol",
+    "network",
+    "logger",
+]
 
-[dependencies]
+[workspace.dependencies]
+network = { path = "network" }
+protocol = { path = "protocol" }
+logger = { path = "logger" }
+
+tokio = { version = "1.45", features = ["rt-multi-thread"] }
+futures = "0.3.31"
+serde = "1.0.219"
+eyre = "0.6.12"
+test-log = { version = "0.2.17", features = ["trace"] }

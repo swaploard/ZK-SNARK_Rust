@@ -1,0 +1,14 @@
+[package]
+name = "prover"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+network.workspace = true
+protocol.workspace = true
+logger.workspace = true
+
+tokio.workspace = true
+eyre.workspace = true
+
+circuit_macro = { path = "circuit_macro" }
