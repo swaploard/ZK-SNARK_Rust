@@ -5,7 +5,7 @@ pub use circuit_macro::circuit;
 /// Arithmetic circuit.
 #[derive(Debug, Default)]
 pub struct Circuit {
-    constraints: Vec<Constraint>,
+    pub constraints: Vec<Constraint>,
 }
 
 impl Circuit {
@@ -15,12 +15,6 @@ impl Circuit {
             constraints: Vec::new(),
         }
     }
-
-    /// Add a constraint to the circuit.
-    pub fn add_constraint(mut self, constraint: Constraint) -> Self {
-        self.constraints.push(constraint);
-        self
-    }
 }
 
 #[derive(Debug)]
@@ -29,7 +23,9 @@ pub struct Constraint {
     pub right: Expression,
 }
 
-#[derive(Debug)]
+/// Expression in the circuit.
+/// Note that division is not supported.
+#[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
     Add {
         left: Box<Expression>,
@@ -43,10 +39,20 @@ pub enum Expression {
         left: Box<Expression>,
         right: Box<Expression>,
     },
-    Div {
-        left: Box<Expression>,
-        right: Box<Expression>,
-    },
+    UnaryMinus(Box<Expression>),
     Const(f64),
     Var(&'static str),
+}
+
+impl std::fmt::Display for Expression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Expression::Add { left, right } => write!(f, "({left} + {right})"),
+            Expression::Sub { left, right } => write!(f, "({left} - {right})"),
+            Expression::Mul { left, right } => write!(f, "({left} * {right})"),
+            Expression::UnaryMinus(expr) => write!(f, "-{expr}"),
+            Expression::Const(value) => write!(f, "{value}"),
+            Expression::Var(name) => write!(f, "{name}"),
+        }
+    }
 }

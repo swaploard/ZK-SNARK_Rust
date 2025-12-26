@@ -1,5 +1,4 @@
 use proc_macro::TokenStream;
-
 use proc_macro_error2::{ResultExt as _, abort, proc_macro_error};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
@@ -16,14 +15,15 @@ pub fn circuit(input: TokenStream) -> TokenStream {
         .map(transform_constraint)
         .collect();
 
-    quote! {
-        ::circuit::Circuit::new()
+    quote! {{
+        let mut __circuit = ::circuit::Circuit::new();
             #(
-                .add_constraint(
+                __circuit.constraints.push(
                     #constraints
-                )
+                );
             )*
-    }
+        __circuit
+    }}
     .into()
 }
 
@@ -92,12 +92,6 @@ fn recursively_transform_expression(expr: Box<syn::Expr>) -> TokenStream2 {
                         right: ::std::boxed::Box::new(#right),
                     }
                 },
-                syn::BinOp::Div(_) => quote! {
-                    ::circuit::Expression::Div {
-                        left: ::std::boxed::Box::new(#left),
-                        right: ::std::boxed::Box::new(#right),
-                    }
-                },
                 _ => abort!(op, "unsupported operator"),
             }
         }
@@ -108,10 +102,9 @@ fn recursively_transform_expression(expr: Box<syn::Expr>) -> TokenStream2 {
         }) => {
             let expr = recursively_transform_expression(expr);
             quote! {
-                ::circuit::Expression::Sub {
-                    left: ::std::boxed::Box::new(::circuit::Expression::Const(0.0)),
-                    right: ::std::boxed::Box::new(#expr),
-                }
+                ::circuit::Expression::UnaryMinus(
+                    ::std::boxed::Box::new(#expr),
+                )
             }
         }
         syn::Expr::Lit(syn::ExprLit {
